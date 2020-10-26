@@ -3,7 +3,7 @@ package dad.javafx.iniciosesion;
 public class Main {
 
 	public static void main(String[] args) {
-		// .main(args);
+		InicioSesion.main(args);
 	}
 
 }

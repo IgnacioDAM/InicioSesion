@@ -7,6 +7,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -23,22 +25,51 @@ public class View extends VBox {
 		super();
 
 		usuarioLabel = new Label("Usuario: ");
-		usuarioText = new TextField("Usuario");
-
-		HBox usuarioBox = new HBox(5, usuarioLabel, usuarioText);
+		usuarioText = new TextField();
+		usuarioText.setPromptText("Usuario");
 
 		contraseñaLabel = new Label("Contraseña: ");
 		contraseñaPassword = new PasswordField();
+		contraseñaPassword.setPromptText("Contraseña");
 
-		HBox contraseñaBox = new HBox(5, contraseñaLabel, contraseñaPassword);
+		GridPane datosPane = new GridPane();
+		datosPane.setHgap(2);
+		datosPane.setVgap(2);
+		datosPane.setAlignment(Pos.CENTER);
+		datosPane.addRow(0, usuarioLabel, usuarioText);
+		datosPane.addRow(1, contraseñaLabel, contraseñaPassword);
+
+		ColumnConstraints[] cols = { new ColumnConstraints(), new ColumnConstraints(), };
+
+		datosPane.getColumnConstraints().setAll(cols);
 
 		accederButton = new Button("Acceder");
 		cancelarButton = new Button("Cancelar");
 
+		HBox botones = new HBox(5, accederButton, cancelarButton);
+
 		this.setSpacing(5);
 		this.setFillWidth(false);
-		this.getChildren().addAll(usuarioBox, contraseñaBox, accederButton, cancelarButton);
+		this.getChildren().addAll(datosPane, botones);
 		this.setAlignment(Pos.CENTER);
+	}
+
+	public void alertaDenegado() {
+		Alert alerta = new Alert(AlertType.ERROR);
+		alerta.setTitle("Iniciar sesión");
+		alerta.setHeaderText("Acceso denegado");
+		alerta.setContentText("El usuario y/o contraseña no son validos.");
+
+		alerta.showAndWait();
+	}
+
+	public void alertaPermitido() {
+		Alert alerta = new Alert(AlertType.INFORMATION);
+		alerta.setTitle("Iniciar sesión");
+		alerta.setHeaderText("Acceso permitido");
+		alerta.setContentText("Las credenciales de acceso son válidas");
+
+		alerta.showAndWait();
 	}
 
 	public Label getUsuarioLabel() {

@@ -1,43 +1,69 @@
 package dad.javafx.iniciosesion;
 
-import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
+import javafx.application.Platform;
 
 public class Controller {
 	private View view = new View();
-	private Model model = new Model();
+	private Model model;
 
 	public Controller() {
 
-		// model.nombreProperty().bind(view.getNombre().textProperty());
-		view.getUsuarioText().textProperty().bind(model.usuarioProperty());
-		view.getContraseñaPassword().textProperty().bind(model.contraseñaProperty());
+		try {
+			model = new Model(leerFichero("users.csv"));
+		} catch (IOException e1) {
+			Platform.exit();
+		}
 
-		view.getAccederButton().setOnAction(e -> onAccederAction(e));
+		// Binding
+		model.usuarioProperty().bind(view.getUsuarioText().textProperty());
+		model.contraseñaProperty().bind(view.getContraseñaPassword().textProperty());
 
-		// view.getCancelarButton().setOnAction(e -> onNombreAction(e));
+		view.getCancelarButton().setOnAction(e -> Platform.exit());
+		view.getAccederButton().setOnAction(e -> onAccederAction());
+	}
+
+	private void onAccederAction() {
+		if (model.getDatosMap().containsKey(model.getUsuario())) {
+			String md5 = DigestUtils.md5Hex(model.getContraseña()).toUpperCase();
+			if (model.getDatosMap().get(model.getUsuario()).equals(md5))
+				view.alertaPermitido();
+			else
+				view.alertaDenegado();
+		}
 	}
 	
-	private void alertaDenegado() {
-		Alert alerta = new Alert(AlertType.ERROR);
-		alerta.setTitle("Iniciar sesión");
-		alerta.setHeaderText("Acceso denegado");
-		alerta.setContentText("El usuario y/o contraseña no son validos.");
+	public static HashMap<String, String> leerFichero(String nombre) throws IOException {
+		HashMap<String, String> result = new HashMap<String, String>();
+		FileReader fr = new FileReader(new File(nombre));
+		BufferedReader br = new BufferedReader(fr);
+		String[] actual;
+		String line;
 
-		alerta.showAndWait();
+		while ((line = br.readLine()) != null) {
+			actual = line.split(",");
+			result.put(actual[0], actual[1]);
+		}
+
+		br.close();
+		fr.close();
+
+		return result;
 	}
 
-	private void alertaPermitido() {
-		Alert alerta = new Alert(AlertType.INFORMATION);
-		alerta.setTitle("Iniciar sesión");
-		alerta.setHeaderText("Acceso permitido");
-		alerta.setContentText("Las credenciales de acceso son válidas");
-
-		alerta.showAndWait();
-	}
 	
-	private void onAccederAction(ActionEvent e) {
-		// TODO Auto-generated method stub
+	public View getView() {
+		return view;
+	}
+
+	public void setView(View view) {
+		this.view = view;
 	}
 }
